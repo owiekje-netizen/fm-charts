@@ -1,0 +1,545 @@
+<!doctype html>
+<html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="robots" content="noindex"><style>html,body{margin:0}[hidden]{display:none!important}</style>
+<title>Institutional FX Volumes</title>
+<meta name="claude:viewport-fit-sides" content="cover">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap">
+<style>
+/* Layout: one article-width column (FinanceMagnates.com body width), header -> selected-month KPI strip -> controls -> main chart on the FM plot field -> two side panels -> data table -> sources */
+:root {
+  --bg: #ffffff;
+  --plot: #f6f6ff;
+  --ink: #0b0b12;
+  --ink-2: #464755;
+  --ink-3: #6f7080;
+  --rule: #e2e3ee;
+  --grid: #e3e5f2;
+  --accent: #1335f6;
+  --chip: #eef0ff;
+  --sel: rgba(19, 53, 246, 0.08);
+  --tip: #ffffff;
+  --shadow: 0 6px 24px rgba(11, 11, 18, 0.12);
+  --s1: #1335f6;
+  --s2: #0b0b12;
+  --s3: #7d8fff;
+  --s4: #adadba;
+  --pos: #1335f6;
+  --neg: #0b0b12;
+  --mast: #000000;
+  --mast-ink: #ffffff;
+  --mast-2: #b2bdff;
+  --mast-3: #a9a9b8;
+  --l1: #1335f6;
+  --l2: #1130e2;
+  --l3: #0f2bcd;
+  --l4: #0d27bc;
+  --on-cobalt: #ffffff;
+  --on-cobalt-2: #c9d0ff;
+  --font: "Inter", ui-sans-serif, system-ui, -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+}
+
+* { box-sizing: border-box; }
+body { background: var(--bg); color: var(--ink); font-family: var(--font); font-size: 15px; line-height: 1.5; }
+.page {
+  max-width: 1040px; margin: 0 auto;
+  padding-block: 10px 6px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+  display: grid; gap: 12px;
+}
+.num { font-variant-numeric: tabular-nums; }
+
+/* Header: the FinanceMagnates.com black header band */
+.mast { background: var(--mast); color: var(--mast-ink); }
+.mast-in {
+  max-width: 1040px; margin: 0 auto;
+  padding-block: 34px 30px;
+  padding-left: max(16px, env(safe-area-inset-left, 0px));
+  padding-right: max(16px, env(safe-area-inset-right, 0px));
+}
+header { display: grid; gap: 10px; max-width: 780px; }
+.eyebrow { font-size: 12px; font-weight: 600; letter-spacing: 0.08em; text-transform: uppercase; color: var(--mast-2); }
+h1 { margin: 0; font-size: clamp(26px, 4.2vw, 40px); line-height: 1.12; font-weight: 600; letter-spacing: -0.01em; text-wrap: balance; color: var(--mast-ink); }
+.deck { margin: 0; font-size: 17px; color: var(--mast-ink); opacity: 0.86; text-wrap: pretty; }
+.how { margin: 2px 0 0; font-size: 13px; color: var(--mast-3); }
+
+/* KPI strip: modular grid on the cobalt ladder */
+.selbar { display: flex; flex-wrap: wrap; align-items: baseline; gap: 6px 12px; margin-bottom: 10px; }
+.selbar strong { font-size: 15px; font-weight: 600; }
+.selbar span { font-size: 13px; color: var(--ink-3); }
+.kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 4px; }
+.kpi { padding: 16px 18px 18px; display: grid; gap: 4px; align-content: start; min-width: 0; color: var(--on-cobalt); }
+.kpi:nth-child(1) { background: var(--l1); }
+.kpi:nth-child(2) { background: var(--l2); }
+.kpi:nth-child(3) { background: var(--l3); }
+.kpi:nth-child(4) { background: var(--l4); }
+.kpi .lab { font-size: 12px; font-weight: 600; letter-spacing: 0.04em; text-transform: uppercase; color: var(--on-cobalt-2); }
+.kpi .val { font-size: clamp(22px, 3vw, 30px); font-weight: 700; letter-spacing: -0.01em; line-height: 1.15; }
+.kpi .sub { font-size: 13px; color: var(--on-cobalt-2); }
+
+/* Controls */
+.controls { display: flex; flex-wrap: wrap; gap: 12px 20px; align-items: center; }
+.group { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.group > .glab { font-size: 12px; font-weight: 600; color: var(--ink-3); text-transform: uppercase; letter-spacing: 0.05em; }
+.seg { display: inline-flex; background: var(--chip); border-radius: 8px; padding: 3px; gap: 2px; }
+.seg button {
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--ink-2);
+  border: 0; background: transparent; padding: 6px 11px; border-radius: 6px; cursor: pointer;
+}
+.seg button[aria-pressed="true"] { background: var(--l1); color: var(--on-cobalt); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip {
+  font: inherit; font-size: 13px; font-weight: 600; color: var(--ink);
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--rule); background: var(--bg); border-radius: 999px; padding: 5px 12px 5px 9px; cursor: pointer;
+}
+.chip .dot { width: 10px; height: 10px; border-radius: 50%; background: var(--c); }
+.chip[aria-pressed="false"] { color: var(--ink-3); }
+.chip[aria-pressed="false"] .dot { background: transparent; box-shadow: inset 0 0 0 2px var(--ink-3); }
+button:focus-visible, .chart:focus-visible, summary:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+
+/* Chart */
+.card { background: var(--plot); border-radius: 4px; padding: 16px 8px 8px 4px; position: relative; }
+.chart-head { display: flex; flex-wrap: wrap; justify-content: space-between; gap: 4px 16px; padding: 0 8px 6px 12px; }
+.chart-head h2 { margin: 0; font-size: 16px; font-weight: 700; }
+.chart-head p { margin: 0; font-size: 13px; color: var(--ink-3); }
+.chart { position: relative; width: 100%; touch-action: pan-y; }
+.chart svg { display: block; width: 100%; height: auto; overflow: visible; }
+.chart text { font-family: var(--font); }
+.tip {
+  position: absolute; z-index: 5; pointer-events: none; min-width: 210px; max-width: 260px;
+  background: var(--tip); color: var(--ink); border: 1px solid var(--rule); border-radius: 6px; box-shadow: var(--shadow);
+  padding: 10px 12px; font-size: 13px; display: grid; gap: 4px;
+}
+.tip .t-h { font-weight: 700; font-size: 13px; margin-bottom: 2px; }
+.tip .row { display: grid; grid-template-columns: 10px 1fr auto auto; gap: 8px; align-items: center; }
+.tip .sw { width: 10px; height: 3px; border-radius: 2px; background: var(--c); }
+.tip .v { font-weight: 700; text-align: right; }
+.tip .d { font-size: 12px; text-align: right; min-width: 52px; }
+.tip .t-f { border-top: 1px solid var(--rule); margin-top: 4px; padding-top: 6px; display: flex; justify-content: space-between; font-weight: 700; }
+.tip .hint { font-size: 11px; color: var(--ink-3); }
+
+/* Panels */
+.panels { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: 28px; }
+.panel { display: grid; gap: 12px; align-content: start; min-width: 0; }
+.panel h3 { margin: 0; font-size: 16px; font-weight: 700; }
+.panel .note { margin: -8px 0 0; font-size: 13px; color: var(--ink-3); }
+.mom { display: grid; gap: 10px; }
+.mrow { display: grid; grid-template-columns: 112px minmax(0, 1fr) 64px; align-items: center; gap: 10px; font-size: 14px; }
+.mrow .name { font-weight: 600; display: flex; align-items: center; gap: 7px; min-width: 0; }
+.mrow .name .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); flex: none; }
+.track { position: relative; height: 18px; }
+.track::before { content: ""; position: absolute; left: 50%; top: -3px; bottom: -3px; width: 1px; background: var(--ink-3); }
+.bar { position: absolute; top: 2px; height: 14px; background: var(--pos); transition: width 0.25s ease, left 0.25s ease; }
+.bar.neg { background: var(--neg); }
+.bar.pos { border-radius: 0 4px 4px 0; }
+.bar.neg { border-radius: 4px 0 0 4px; }
+.mrow .pct { text-align: right; font-weight: 700; }
+.share { display: flex; height: 28px; gap: 2px; }
+.share div { background: var(--c); transition: flex-basis 0.25s ease; min-width: 2px; }
+.share div:first-child { border-radius: 4px 0 0 4px; }
+.share div:last-child { border-radius: 0 4px 4px 0; }
+.slist { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px 16px; font-size: 14px; }
+.slist div { display: grid; grid-template-columns: 9px 1fr auto; gap: 7px; align-items: center; }
+.slist .dot { width: 9px; height: 9px; border-radius: 50%; background: var(--c); }
+.slist b { font-weight: 700; }
+.slist span.lvl { color: var(--ink-3); font-size: 12px; grid-column: 2 / 4; margin-top: -4px; }
+
+/* Table */
+details { border-top: 1px solid var(--rule); padding-top: 12px; }
+summary { cursor: pointer; font-weight: 700; font-size: 14px; color: var(--accent); width: fit-content; }
+.tablewrap { overflow-x: auto; margin-top: 12px; }
+table { border-collapse: collapse; width: 100%; font-size: 13px; min-width: 560px; }
+th, td { padding: 7px 10px; text-align: right; border-bottom: 1px solid var(--rule); white-space: nowrap; }
+th:first-child, td:first-child { text-align: left; }
+thead th { font-size: 12px; color: var(--ink-3); font-weight: 600; text-transform: uppercase; letter-spacing: 0.04em; }
+tbody tr.is-sel { background: var(--sel); }
+td.tot { font-weight: 700; }
+
+footer { display: grid; gap: 6px; font-size: 13px; color: var(--ink-2); border-top: 2px solid var(--ink); padding-top: 12px; }
+footer p { margin: 0; max-width: 820px; }
+footer a { color: var(--accent); }
+.c1 { --c: var(--s1); } .c2 { --c: var(--s2); } .c3 { --c: var(--s3); } .c4 { --c: var(--s4); }
+
+@media (max-width: 760px) {
+  .kpis { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .panels { grid-template-columns: minmax(0, 1fr); }
+}
+@media (max-width: 420px) {
+  .mrow { grid-template-columns: 96px minmax(0, 1fr) 58px; font-size: 13px; }
+  .slist { grid-template-columns: minmax(0, 1fr); }
+}
+@media (prefers-reduced-motion: reduce) {
+  .bar, .share div { transition: none; }
+}
+.emb-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: 4px 12px; }
+.emb-head b { font-size: 17px; font-weight: 700; }
+.emb-head span { font-size: 13px; color: var(--ink-3); }
+.emb-src { margin: 0; font-size: 12px; color: var(--ink-3); }
+.page > details { display: none; }
+@media (max-width: 520px) {
+  .emb-head span, .group > .glab { display: none; }
+  .controls { gap: 8px; }
+  .seg button { padding: 5px 8px; font-size: 12px; }
+  .chip { font-size: 12px; padding: 4px 9px 4px 7px; }
+  .chart-head h2 { font-size: 14px; }
+  .card { padding-top: 10px; }
+}
+</style>
+
+
+<div class="page">
+  <div class="emb-head"><b>Spot volume on four FX venues</b><span>Hover or tap a month. Switch views and toggle venues.</span></div>
+
+
+  <div class="controls">
+    <div class="group">
+      <span class="glab" id="viewLab">View</span>
+      <div class="seg" role="group" aria-labelledby="viewLab" id="viewSeg">
+        <button type="button" data-view="venue" aria-pressed="true">By venue</button>
+        <button type="button" data-view="combined" aria-pressed="false">Combined</button>
+        <button type="button" data-view="index" aria-pressed="false">Growth index</button>
+      </div>
+    </div>
+    <div class="group">
+      <span class="glab" id="rangeLab">Period</span>
+      <div class="seg" role="group" aria-labelledby="rangeLab" id="rangeSeg">
+        <button type="button" data-range="all" aria-pressed="true">Since Jan 2025</button>
+        <button type="button" data-range="2026" aria-pressed="false">2026</button>
+      </div>
+    </div>
+    <div class="chips" id="chips" role="group" aria-label="Venues shown"></div>
+  </div>
+
+  <section class="card" aria-labelledby="chartTitle">
+    <div class="chart-head">
+      <h2 id="chartTitle">Spot average daily volume by venue</h2>
+      <p id="chartUnit">US$ billion per trading day</p>
+    </div>
+    <div class="chart" id="chart" tabindex="0" role="img" aria-label="Line chart of monthly spot average daily volume on FXSpotStream, Cboe FX, 360T and Euronext FX. A data table is available below."></div>
+    <div class="tip" id="tip" hidden></div>
+  </section>
+
+
+
+  <p class="emb-src">Source: FXSpotStream, Cboe FX, 360T and Euronext FX venue data, FM Intelligence calculations. Spot average daily volume.</p>
+</div>
+
+<script>
+(() => {
+  const DATA = {"months": ["2025-01", "2025-02", "2025-03", "2025-04", "2025-05", "2025-06", "2025-07", "2025-08", "2025-09", "2025-10", "2025-11", "2025-12", "2026-01", "2026-02", "2026-03", "2026-04", "2026-05", "2026-06", "2026-07", "2026-08", "2026-09"], "series": {"FXSpotStream": [72.84, 75.13, 83.07, 91.41, 68.01, 67.29, 68.39, 71.16, 82.19, 85.86, 83.37, 79.05, 108.09, 105.61, 127.92, 100.02, 105.33, 113.19, 112.22, 107.8, 129.51], "Cboe FX": [47.45, 48.04, 52.11, 61.9, 47.97, 48.31, 45.59, 45.72, 49.08, 51.76, 49.61, 48.55, 63.3, 59.67, 74.47, 53.85, 54.86, 59.63, 56.79, 51.82, 61.64], "360T": [33.08, 33.89, 36.81, 39.58, 32.72, 33.89, 33.42, 32.65, 34.89, 33.95, 33.92, 32.23, 38.8, 39.91, 48.93, 39.0, 39.86, 42.39, 40.39, 37.6, 42.28], "Euronext FX": [27.73, 29.44, 31.33, 38.16, 27.5, 27.66, 25.42, 23.48, 23.21, 24.7, 23.69, 23.6, 34.89, 31.1, 39.71, 28.3, 28.07, 30.53, 28.16, 28.37, 34.5]}};
+
+  const VENUES = [
+    { key: "FXSpotStream", c: "c1", v: "--s1" },
+    { key: "Cboe FX", c: "c2", v: "--s2" },
+    { key: "360T", c: "c3", v: "--s3" },
+    { key: "Euronext FX", c: "c4", v: "--s4", dash: "6 4" }
+  ];
+  const MON = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+  const MONL = ["January", "February", "March", "April", "May", "June", "July", "August", "September", "October", "November", "December"];
+  const M = DATA.months.map(s => { const [y, m] = s.split("-").map(Number); return { y, m, short: MON[m - 1], long: MONL[m - 1] + " " + y }; });
+  const N = M.length;
+  const val = (k, i) => DATA.series[k][i];
+  const total = i => VENUES.reduce((a, v) => a + val(v.key, i), 0);
+  const pct = (a, b) => (a / b - 1) * 100;
+  const fBn = x => "$" + x.toFixed(1) + "bn";
+  const fPct = p => (p >= 0 ? "+" : "−") + Math.abs(p).toFixed(1) + "%";
+  const cls = p => (p >= 0 ? "up" : "down");
+  const esc = s => String(s).replace(/&/g, "&amp;").replace(/</g, "&lt;");
+
+  const state = { view: "venue", range: "all", on: new Set(VENUES.map(v => v.key)), sel: N - 1, hover: null };
+  try {
+    const saved = JSON.parse(localStorage.getItem("fxdemo") || "null");
+    if (saved && ["venue", "combined", "index"].includes(saved.view)) state.view = saved.view;
+    if (saved && ["all", "2026"].includes(saved.range)) state.range = saved.range;
+  } catch (e) {}
+  const persist = () => { try { localStorage.setItem("fxdemo", JSON.stringify({ view: state.view, range: state.range })); } catch (e) {} };
+
+  const rangeIdx = () => { const out = []; for (let i = 0; i < N; i++) if (state.range === "all" || M[i].y === 2026) out.push(i); return out; };
+  const activeVenues = () => VENUES.filter(v => state.on.has(v.key));
+
+  const chartEl = document.getElementById("chart");
+  const tipEl = document.getElementById("tip");
+  let geo = null;
+
+  function niceTicks(min, max, n) {
+    const step0 = (max - min) / n;
+    const mag = Math.pow(10, Math.floor(Math.log10(step0)));
+    const e = step0 / mag;
+    const step = (e >= 7.5 ? 10 : e >= 3.5 ? 5 : e >= 1.5 ? 2 : 1) * mag;
+    const lo = Math.floor(min / step) * step, hi = Math.ceil(max / step) * step;
+    const t = [];
+    for (let v = lo; v <= hi + step / 1e6; v += step) t.push(Math.round(v * 1e6) / 1e6);
+    return t;
+  }
+
+  function topRounded(x, y, w, h, r) {
+    r = Math.min(r, w / 2, h);
+    return `M${x},${y + h}V${y + r}Q${x},${y} ${x + r},${y}H${x + w - r}Q${x + w},${y} ${x + w},${y + r}V${y + h}Z`;
+  }
+
+  function seriesValues(v, idx) {
+    if (state.view === "index") { const base = val(v.key, idx[0]); return idx.map(i => val(v.key, i) / base * 100); }
+    return idx.map(i => val(v.key, i));
+  }
+
+  function draw() {
+    const W = Math.max(280, chartEl.clientWidth);
+    const narrow = W < 600;
+    const H = W < 520 ? 270 : narrow ? 300 : 380;
+    const lines = state.view !== "combined";
+    const mL = narrow ? 44 : 54, mR = lines && !narrow ? 124 : 12, mT = 14, mB = 40;
+    const idx = rangeIdx(), n = idx.length;
+    const pw = W - mL - mR, ph = H - mT - mB, band = pw / n;
+    const xk = k => mL + band * (k + 0.5);
+    const act = activeVenues();
+
+    let lo, hi;
+    if (state.view === "combined") {
+      lo = 0; hi = Math.max(...idx.map(i => act.reduce((a, v) => a + val(v.key, i), 0)));
+    } else {
+      const all = act.flatMap(v => seriesValues(v, idx));
+      if (state.view === "index") { lo = Math.min(100, ...all); hi = Math.max(100, ...all); const pad = (hi - lo) * 0.08; lo -= pad; hi += pad; }
+      else { lo = 0; hi = Math.max(...all); }
+    }
+    const ticks = niceTicks(lo, hi, narrow ? 4 : 5);
+    const y0 = ticks[0], y1 = ticks[ticks.length - 1];
+    const y = v => mT + ph - (v - y0) / (y1 - y0) * ph;
+    const tickLab = v => state.view === "index" ? String(Math.round(v)) : "$" + Math.round(v) + (v === 0 ? "" : "bn");
+
+    let s = `<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" aria-hidden="true">`;
+    const kSel = idx.indexOf(state.sel);
+    if (kSel >= 0) s += `<rect x="${mL + band * kSel}" y="${mT}" width="${band}" height="${ph}" fill="var(--sel)"/>`;
+
+    ticks.forEach(t => {
+      const yy = y(t);
+      const strong = (state.view !== "index" && t === 0) || (state.view === "index" && t === 100);
+      s += `<line x1="${mL}" x2="${W - mR + (lines && !narrow ? 8 : 0)}" y1="${yy}" y2="${yy}" stroke="${strong ? "var(--ink-3)" : "var(--grid)"}" stroke-width="1" ${state.view === "index" && t === 100 ? 'stroke-dasharray="4 3"' : ""}/>`;
+      s += `<text x="${mL - 8}" y="${yy + 4}" text-anchor="end" font-size="12" fill="var(--ink-3)" class="num">${tickLab(t)}</text>`;
+    });
+
+    const every = band >= 34 ? 1 : band >= 18 ? 2 : 3;
+    idx.forEach((i, k) => {
+      const isJan = M[i].m === 1;
+      if (!isJan && every > 1 && M[i].m % every !== 1) return;
+      s += `<text x="${xk(k)}" y="${mT + ph + 17}" text-anchor="middle" font-size="12" fill="var(--ink-3)" font-weight="${k === kSel ? 700 : 400}">${M[i].short}</text>`;
+      if (isJan) s += `<text x="${xk(k)}" y="${mT + ph + 33}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink-2)">${M[i].y}</text>`;
+    });
+
+    if (state.view === "combined") {
+      const bw = Math.max(3, Math.min(band * 0.64, 34));
+      idx.forEach((i, k) => {
+        let acc = 0;
+        const x = xk(k) - bw / 2;
+        act.forEach((v, j) => {
+          const vv = val(v.key, i);
+          const yTop = y(acc + vv), yBot = y(acc);
+          acc += vv;
+          let h = yBot - yTop - (j > 0 ? 2 : 0);
+          if (h <= 0) return;
+          const top = j === act.length - 1;
+          const op = state.hover === null || state.hover === k ? 1 : 0.55;
+          if (top) s += `<path d="${topRounded(x, yTop, bw, h, 4)}" fill="var(${v.v})" opacity="${op}"/>`;
+          else s += `<rect x="${x}" y="${yTop}" width="${bw}" height="${h}" fill="var(${v.v})" opacity="${op}"/>`;
+        });
+        if (k === kSel) s += `<text x="${xk(k)}" y="${y(acc) - 7}" text-anchor="middle" font-size="12" font-weight="700" fill="var(--ink)" class="num">${fBn(acc)}</text>`;
+      });
+    } else {
+      const ends = [];
+      act.forEach(v => {
+        const vals = seriesValues(v, idx);
+        const d = vals.map((vv, k) => (k ? "L" : "M") + xk(k).toFixed(1) + "," + y(vv).toFixed(1)).join("");
+        s += `<path d="${d}" fill="none" stroke="var(${v.v})" stroke-width="2.25" stroke-linejoin="round" stroke-linecap="round"${v.dash ? ` stroke-dasharray="${v.dash}"` : ""}/>`;
+        const kk = n - 1;
+        s += `<circle cx="${xk(kk)}" cy="${y(vals[kk])}" r="4" fill="var(${v.v})" stroke="var(--plot)" stroke-width="2"/>`;
+        ends.push({ v, y: y(vals[kk]), val: vals[kk] });
+      });
+      if (!narrow) {
+        ends.sort((a, b) => a.y - b.y);
+        const gap = 30;
+        for (let i = 1; i < ends.length; i++) if (ends[i].y - ends[i - 1].y < gap) ends[i].y = ends[i - 1].y + gap;
+        const over = ends.length ? ends[ends.length - 1].y - (mT + ph) : 0;
+        if (over > 0) ends.forEach(e => e.y -= over);
+        const lx = W - mR + 16;
+        ends.forEach(e => {
+          s += `<rect x="${lx}" y="${e.y - 8}" width="10" height="3" rx="1.5" fill="var(${e.v.v})"/>`;
+          s += `<text x="${lx + 15}" y="${e.y - 3}" font-size="12" font-weight="600" fill="var(--ink-2)">${esc(e.v.key)}</text>`;
+          s += `<text x="${lx + 15}" y="${e.y + 12}" font-size="13" font-weight="700" fill="var(--ink)" class="num">${state.view === "index" ? Math.round(e.val) : fBn(e.val)}</text>`;
+        });
+      }
+      if (state.hover !== null) {
+        const hx = xk(state.hover);
+        s += `<line x1="${hx}" x2="${hx}" y1="${mT}" y2="${mT + ph}" stroke="var(--ink-3)" stroke-width="1" stroke-dasharray="3 3"/>`;
+        act.forEach(v => {
+          const vv = seriesValues(v, idx)[state.hover];
+          s += `<circle cx="${hx}" cy="${y(vv)}" r="5" fill="var(${v.v})" stroke="var(--plot)" stroke-width="2"/>`;
+        });
+      }
+    }
+    s += `<rect x="${mL}" y="${mT}" width="${pw}" height="${ph + mB}" fill="transparent" id="hit"/>`;
+    s += `</svg>`;
+    chartEl.innerHTML = s;
+    geo = { mL, band, n, idx, W, mT, ph };
+
+    const titles = { venue: ["Spot average daily volume by venue", "US$ billion per trading day"], combined: ["Combined spot average daily volume", "US$ billion per trading day, stacked by venue"], index: ["Growth by venue", "Index, " + M[idx[0]].long + " = 100"] };
+    document.getElementById("chartTitle").textContent = titles[state.view][0];
+    document.getElementById("chartUnit").textContent = titles[state.view][1];
+  }
+
+  function showTip(k, px, py) {
+    const i = geo.idx[k];
+    const act = activeVenues();
+    const idxView = state.view === "index";
+    const rows = act.map(v => {
+      const lvl = val(v.key, i);
+      const shown = idxView ? val(v.key, i) / val(v.key, geo.idx[0]) * 100 : lvl;
+      const d = i > 0 ? pct(lvl, val(v.key, i - 1)) : null;
+      return { v, lvl, shown, d };
+    }).sort((a, b) => b.shown - a.shown);
+    let h = `<div class="t-h">${M[i].long}</div>`;
+    rows.forEach(r => {
+      h += `<div class="row ${r.v.c}"><span class="sw"></span><span>${esc(r.v.key)}</span><span class="v num">${idxView ? Math.round(r.shown) : fBn(r.lvl)}</span><span class="d num ${r.d === null ? "" : cls(r.d)}">${r.d === null ? "" : fPct(r.d)}</span></div>`;
+    });
+    const sumAct = act.reduce((a, v) => a + val(v.key, i), 0);
+    h += `<div class="t-f"><span>${act.length === 4 ? "Combined" : "Selected venues"}</span><span class="num">${fBn(sumAct)}</span></div>`;
+    h += `<div class="hint">Change vs previous month.</div>`;
+    tipEl.innerHTML = h;
+    tipEl.hidden = false;
+    const card = tipEl.parentElement.getBoundingClientRect();
+    const cr = chartEl.getBoundingClientRect();
+    const tw = tipEl.offsetWidth, th = tipEl.offsetHeight;
+    const scale = cr.width / geo.W;
+    const ax = cr.left - card.left + (geo.mL + geo.band * (k + 0.5)) * scale;
+    let left = ax + 16;
+    if (left + tw > card.width - 8) left = ax - tw - 16;
+    if (left < 8) left = Math.max(8, Math.min(card.width - tw - 8, ax - tw / 2));
+    let top = (py !== undefined ? py - card.top : cr.top - card.top + 20) - th / 2;
+    top = Math.max(8, Math.min(card.height - th - 8, top));
+    tipEl.style.left = left + "px";
+    tipEl.style.top = top + "px";
+  }
+
+  function hideTip() { tipEl.hidden = true; if (state.hover !== null) { state.hover = null; draw(); } }
+
+  function kFromEvent(e) {
+    const r = chartEl.getBoundingClientRect();
+    const sx = (e.clientX - r.left) * (geo.W / r.width);
+    const k = Math.floor((sx - geo.mL) / geo.band);
+    return Math.max(0, Math.min(geo.n - 1, k));
+  }
+
+  chartEl.addEventListener("pointermove", e => {
+    if (!geo) return;
+    const k = kFromEvent(e);
+    if (k !== state.hover) { state.hover = k; draw(); }
+    showTip(k, e.clientX, e.clientY);
+  });
+  chartEl.addEventListener("pointerleave", e => { if (e.pointerType === "mouse") hideTip(); });
+  chartEl.addEventListener("click", e => {
+    const k = kFromEvent(e);
+    state.sel = geo.idx[k];
+    state.hover = k;
+    renderAll(false);
+    showTip(k, e.clientX, e.clientY);
+  });
+  chartEl.addEventListener("keydown", e => {
+    const idx = rangeIdx();
+    let k = idx.indexOf(state.sel);
+    if (e.key === "ArrowLeft") k = Math.max(0, k - 1);
+    else if (e.key === "ArrowRight") k = Math.min(idx.length - 1, k + 1);
+    else if (e.key === "Escape") { hideTip(); return; }
+    else return;
+    e.preventDefault();
+    state.sel = idx[k];
+    state.hover = k;
+    renderAll(false);
+    showTip(k);
+  });
+  chartEl.addEventListener("blur", () => hideTip());
+  document.addEventListener("pointerdown", e => { if (!chartEl.contains(e.target)) hideTip(); });
+
+  function renderKpis() {
+    const i = state.sel, t = total(i);
+    document.getElementById("selName").textContent = M[i].long;
+    const prev = i > 0 ? total(i - 1) : null;
+    const yago = i >= 12 ? total(i - 12) : null;
+    let best = null;
+    if (i > 0) VENUES.forEach(v => { const d = pct(val(v.key, i), val(v.key, i - 1)); if (!best || d > best.d) best = { v, d }; });
+    const tiles = [
+      ["Combined spot ADV", fBn(t), "", "Four venues, per trading day"],
+      ["vs previous month", prev === null ? "n/a" : fPct(pct(t, prev)), prev === null ? "" : cls(pct(t, prev)), prev === null ? "No earlier month in this data set" : "From " + fBn(prev) + " in " + M[i - 1].long],
+      ["vs a year earlier", yago === null ? "n/a" : fPct(pct(t, yago)), yago === null ? "" : cls(pct(t, yago)), yago === null ? "Year-earlier data starts in 2026" : "From " + fBn(yago) + " in " + M[i - 12].long],
+      ["Biggest monthly gain", best ? esc(best.v.key) : "n/a", "", best ? fPct(best.d) + " to " + fBn(val(best.v.key, i)) : "No earlier month in this data set"]
+    ];
+    document.getElementById("kpis").innerHTML = tiles.map(([l, v, c, s]) => `<div class="kpi"><div class="lab">${l}</div><div class="val num ${c}">${v}</div><div class="sub num">${s}</div></div>`).join("");
+  }
+
+  function renderMom() {
+    const i = state.sel;
+    const box = document.getElementById("mom");
+    if (i === 0) {
+      document.getElementById("momNote").textContent = M[i].long + " is the first month in this data set";
+      box.innerHTML = "";
+      return;
+    }
+    document.getElementById("momNote").textContent = M[i].long + " vs " + M[i - 1].long;
+    const ds = VENUES.map(v => ({ v, d: pct(val(v.key, i), val(v.key, i - 1)) }));
+    const max = Math.max(10, ...ds.map(x => Math.abs(x.d)));
+    box.innerHTML = ds.map(({ v, d }) => {
+      const w = Math.abs(d) / max * 50;
+      const pos = d >= 0;
+      return `<div class="mrow ${v.c}"><span class="name"><span class="dot"></span>${esc(v.key)}</span><span class="track"><span class="bar ${pos ? "pos" : "neg"}" style="left:${pos ? 50 : 50 - w}%;width:${w}%"></span></span><span class="pct num ${cls(d)}">${fPct(d)}</span></div>`;
+    }).join("");
+  }
+
+  function renderShare() {
+    const i = state.sel, t = total(i);
+    document.getElementById("shareNote").textContent = M[i].long + ", four venues, " + fBn(t) + " a day";
+    document.getElementById("shareBar").innerHTML = VENUES.map(v => `<div class="${v.c}" style="flex:0 0 calc(${val(v.key, i) / t * 100}% - 2px)" title="${esc(v.key)}"></div>`).join("");
+    document.getElementById("shareList").innerHTML = VENUES.map(v => `<div class="${v.c}"><span class="dot"></span><span>${esc(v.key)}</span><b class="num">${(val(v.key, i) / t * 100).toFixed(1)}%</b><span class="lvl num">${fBn(val(v.key, i))}</span></div>`).join("");
+  }
+
+  function renderTable() {
+    let h = "<thead><tr><th>Month</th>" + VENUES.map(v => `<th>${esc(v.key)}</th>`).join("") + "<th>Combined</th></tr></thead><tbody>";
+    for (let i = N - 1; i >= 0; i--) {
+      h += `<tr class="${i === state.sel ? "is-sel" : ""}"><td>${M[i].long}</td>` + VENUES.map(v => `<td class="num">${val(v.key, i).toFixed(2)}</td>`).join("") + `<td class="num tot">${total(i).toFixed(2)}</td></tr>`;
+    }
+    document.getElementById("table").innerHTML = h + "</tbody>";
+  }
+
+  function renderControls() {
+    document.querySelectorAll("#viewSeg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.view === state.view)));
+    document.querySelectorAll("#rangeSeg button").forEach(b => b.setAttribute("aria-pressed", String(b.dataset.range === state.range)));
+    document.getElementById("chips").innerHTML = VENUES.map(v => `<button type="button" class="chip ${v.c}" data-key="${esc(v.key)}" aria-pressed="${state.on.has(v.key)}"><span class="dot"></span>${esc(v.key)}</button>`).join("");
+  }
+
+  function renderAll(controls = true) {
+    if (controls) renderControls();
+    draw();
+  }
+
+  document.getElementById("viewSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.view = b.dataset.view; state.hover = null; tipEl.hidden = true; persist(); renderAll();
+  });
+  document.getElementById("rangeSeg").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    state.range = b.dataset.range; state.hover = null; tipEl.hidden = true;
+    if (!rangeIdx().includes(state.sel)) state.sel = N - 1;
+    persist(); renderAll();
+  });
+  document.getElementById("chips").addEventListener("click", e => {
+    const b = e.target.closest("button"); if (!b) return;
+    const k = b.dataset.key;
+    if (state.on.has(k)) { if (state.on.size > 1) state.on.delete(k); } else state.on.add(k);
+    tipEl.hidden = true; state.hover = null; renderAll();
+  });
+
+  let raf = 0;
+  new ResizeObserver(() => { cancelAnimationFrame(raf); raf = requestAnimationFrame(draw); }).observe(chartEl);
+  renderAll();
+})();
+</script>
+
+</body></html>
